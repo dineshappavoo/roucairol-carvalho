@@ -33,4 +33,4 @@ This library has the implementation based on Dimacs graph input
 
 * Dinesh Appavoo ([@DineshAppavoo](https://twitter.com/DineshAppavoo))
 * Rahul Nair
-* Anukul
+* Anukul Kumar
