@@ -6,32 +6,19 @@
 # a comment and should be ignored by the parser.
 
 # Number of nodes
-10    	
+p 10    	
+	
+n	0				dc01		3332	
+n	1				dc33		5678	
+n	2				dc21		5231	
+n	3				dc33		2311	
+n	4				dc22		3124	
+n	5				dc03		3432	
+n	6				dc21		7878	
+n	7				dc05		7361	
+n	8				dc04		4341	
+n	9				dc22		6754
 
-# First, we list the location of each node
-#
-# Format is:
-# Identifier	Hostname	Port	
-	0				dc01		3332	
-	1				dc33		5678	
-	2				dc21		5231	
-	3				dc33		2311	
-	4				dc22		3124	
-	5				dc03		3432	
-	6				dc21		7878	
-	7				dc05		7361	
-	8				dc04		4341	
-	9				dc22		6754
-
-
-# Distribution of shared keys can be done in an arbitrary manner
-
-# Parameters to control the behavior of the application
-
-# number of critical section requests per node
-1000       
-# Mean delay between two consecutive critical section requests
-50        
-# Mean duration of critical section
-10 	
-# Use exponential probability distribution for the last two parameters
+cscount 1000       
+meandelay 50        
+duration 10 	
