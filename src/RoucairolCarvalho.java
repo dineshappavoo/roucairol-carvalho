@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
@@ -14,7 +16,9 @@ public class RoucairolCarvalho {
 	private static int noOfNodes;
 	//private static int nodeId;
 	private static Random rand;//= new Random();
-
+	private static int noOfCriticalSectionRequests;
+	private static int meanDelayInCriticalSection;
+	private static int durationOfCriticalSection;
 
 	public HashMap<Integer, Host> constructGraph(String fileName, int nodeId) throws FileNotFoundException
 	{
@@ -59,6 +63,21 @@ public class RoucairolCarvalho {
 						}
 					}
 				}
+				
+				if((checker=scanner.next()).equals("cscount") && (!(checker.equals("#"))))
+				{
+					noOfCriticalSectionRequests = scanner.nextInt();
+				}
+				
+				if((checker=scanner.next()).equals("meandelay") && (!(checker.equals("#"))))
+				{
+					meanDelayInCriticalSection = scanner.nextInt();
+				}
+				
+				if((checker=scanner.next()).equals("duration") && (!(checker.equals("#"))))
+				{
+					durationOfCriticalSection = scanner.nextInt();
+				}
 			}
 		}
 		printNodeMap();
@@ -87,6 +106,12 @@ public class RoucairolCarvalho {
 
 		return randomNum;
 	}
+	
+	public String currentTime()
+	{
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+		return timeStamp;
+	}
 
 	public void printNodeMap()
 	{
@@ -94,8 +119,14 @@ public class RoucairolCarvalho {
 		for(int nodeId : nodeMap.keySet())
 		{
 			host = nodeMap.get(nodeId);
-			System.out.println("Host Id "+nodeId+"  Name : "+host.hostName+"  port : "+host.hostPort+"  Key Known?  "+host.keyKnown);
+			System.out.println("[INFO]	["+currentTime()+"]	Host Id "+nodeId+"  Name : "+host.hostName+"  port : "+host.hostPort+"  Key Known?  "+host.keyKnown);
 		}
+	}
+	
+	public void simulateRoucairolCarvalho() throws FileNotFoundException
+	{
+		HashMap<Integer, Host> nMap = constructGraph("/Users/Dany/Documents/FALL-2013-COURSES/Imp_Data_structures/workspace/roucairol-carvalho/src/config.txt", 5);
+		System.out.println("No Of CS : "+noOfCriticalSectionRequests+"  Mean Delay : "+meanDelayInCriticalSection+"  Duration Of CS : "+durationOfCriticalSection);
 	}
 
 	/**
@@ -104,8 +135,8 @@ public class RoucairolCarvalho {
 	 */
 	public static void main(String[] args) throws FileNotFoundException {
 		// TODO Auto-generated method stub
-		HashMap<Integer, Host> nMap = new RoucairolCarvalho().constructGraph("/Users/Dany/Documents/FALL-2013-COURSES/Imp_Data_structures/workspace/roucairol-carvalho/src/config.txt", 5);
-
+		RoucairolCarvalho rcObject = new RoucairolCarvalho();
+		rcObject.simulateRoucairolCarvalho();
 	}
 
 }
