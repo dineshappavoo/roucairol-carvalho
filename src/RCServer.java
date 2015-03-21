@@ -16,7 +16,11 @@ import java.nio.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 public class RCServer implements Runnable{
 	public static final int MESSAGE_SIZE = 1000;
 
@@ -25,8 +29,8 @@ public class RCServer implements Runnable{
 	private int nodeId;
 	private int nWaitingForTerminationResponseCount;
 	private static boolean isInCriticalSection = false;
-	private static ArrayList<Host> preemptList = new ArrayList<Host>();
-
+	private PriorityQueue<Message> minHeap;
+	//private static ArrayList<Host> preEmptQueue;
 
 	public RCServer(HashMap<Integer, Host> nodeMap, int nodeId, int nWaitingForTerminationResponseCount)
 	{
@@ -54,7 +58,8 @@ public class RCServer implements Runnable{
 
 
 			Thread.sleep(5000);
-			preemptList = new ArrayList<Host>();
+			minHeap = getPriorityQueue();
+			//preEmptQueue = new ArrayList<Host>();
 
 			//Server goes into a permanent loop accepting connections from clients			
 			while(true)
@@ -75,29 +80,34 @@ public class RCServer implements Runnable{
 
 				if(messageObj.messageType  == MessageType.REQUEST_KEY)
 				{
+					System.out.println("[INFO]	["+sTime()+"]	Request Node Id "+messageObj.nodeInfo.hostId+"  SERVER STARTED");
+
 					if(!isInCriticalSection)
 					{
-						startRCClient(nodeMap.get(nodeId), MessageType.RESPONSE_KEY);
+						int hostid = messageObj.nodeInfo.hostId;
+						nodeMap.get(hostid).keyKnown = false;
+						startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_KEY);
 					}else
 					{
-						preemptList.add(messageObj.nodeInfo);
+						minHeap.add(messageObj);
+						//preEmptQueue.add(messageObj.nodeInfo);
 					}
 				}else if(messageObj.messageType  == MessageType.RESPONSE_KEY)
 				{
 					int hostid = messageObj.nodeInfo.hostId;
 					nodeMap.get(hostid).keyKnown = true;
-					
+
 					if(!isAllNodeKeysKnown())
 					{
 						;
 					}
-					
+
 				}else if(messageObj.messageType == MessageType.RESPONSE_AND_REQUEST_KEY)
 				{
 					int hostid = messageObj.nodeInfo.hostId;
 					nodeMap.get(hostid).keyKnown = true;
-					
-					
+
+
 				}else if(messageObj.messageType == MessageType.TERMINATION_REQUEST)
 				{
 
@@ -120,7 +130,7 @@ public class RCServer implements Runnable{
 		}
 		catch(IOException ex)
 		{
-			ex.printStackTrace();
+			ex.printStackTrace();	
 		}catch(InterruptedException ex)
 		{
 			ex.printStackTrace();
@@ -129,7 +139,25 @@ public class RCServer implements Runnable{
 			ex.printStackTrace();
 		}
 	}
-	
+
+	public PriorityQueue<Message> getPriorityQueue()
+	{
+		PriorityQueue<Message> queue = new PriorityQueue<Message>(11, new Comparator<Message>()
+				{
+			public int compare(Message o1, Message o2)
+			{
+				long t1=o1.timeStamp;
+				long t2=o2.timeStamp;
+				if(t1>=t2)
+					return 1;
+				else
+					return -1;
+			}
+				}
+				);
+		return queue;	
+	}
+
 	public boolean isAllNodeKeysKnown()
 	{
 		Host host;
@@ -158,8 +186,8 @@ public class RCServer implements Runnable{
 	{
 		//make the isInCriticalSection boolean as false
 		isInCriticalSection = false;
-		startRCClients(preemptList, MessageType.RESPONSE_KEY);
-		preemptList = new ArrayList<Host>();
+		startRCClients(minHeap, MessageType.RESPONSE_KEY);
+		minHeap = getPriorityQueue();
 		return;
 	}
 
@@ -200,14 +228,14 @@ public class RCServer implements Runnable{
 	{		
 		RCClient  rCClient;
 		Message message;
-		message = new Message(sMessageType, host);
+		message = new Message(System.currentTimeMillis(), sMessageType, host);
 		rCClient = new RCClient(host, message);
 		new Thread(rCClient).start();
 	}
 
-	public void startRCClients(ArrayList<Host> hostList, MessageType sMessageType)
+	public void startRCClients(PriorityQueue<Message> minHeap, MessageType sMessageType)
 	{		
-		int size = hostList.size();
+		int size = minHeap.size();
 		int nNumOfThreads=size;
 		Thread[] tThreads = new Thread[nNumOfThreads];
 		RCClient  rCClient;
@@ -219,10 +247,11 @@ public class RCServer implements Runnable{
 		{
 			currentAdjList.add(nodeMap.get(nodeID));
 		}
-
-		for(int i=0;i<size;i++)
+		int i=0;
+		while(size>0)
 		{
-			if (nodeId!=hostList.get(i).hostId)
+			Host host = minHeap.poll().nodeInfo;
+			if (nodeId!=host.hostId)
 			{
 				//System.out.println("CLIENT CALL TYPE : "+sMessageType);
 				//Increment the count only on requests
@@ -230,10 +259,11 @@ public class RCServer implements Runnable{
 				{
 					nWaitingForTerminationResponseCount++;
 				}
-				message = new Message(sMessageType, nodeMap.get(nodeId));
-				rCClient = new RCClient(hostList.get(i), message);
+				message = new Message(System.currentTimeMillis(), sMessageType, nodeMap.get(nodeId));
+				rCClient = new RCClient(host, message);
 				tThreads[i] = new Thread(rCClient);
 				tThreads[i].start();
+				i++;
 			}
 		}
 	}
