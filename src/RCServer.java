@@ -111,6 +111,9 @@ public class RCServer implements Runnable{
 				}else if(messageObj.messageType == MessageType.TERMINATION_REQUEST)
 				{
 
+				}else if(messageObj.messageType == MessageType.TERMINATION_RESPONSE)
+				{
+
 				}
 
 				System.out.println("WAITING COUNT : "+nWaitingForTerminationResponseCount);
@@ -157,6 +160,19 @@ public class RCServer implements Runnable{
 				);
 		return queue;	
 	}
+	
+	public void requestAllKeys()
+	{
+		Host host;
+		for(int nId : nodeMap.keySet())
+		{
+			host = nodeMap.get(nId);
+			if(!host.keyKnown && nodeId != host.hostId)
+			{
+				startRCClient(host, MessageType.REQUEST_KEY);
+			}
+		}
+	}
 
 	public boolean isAllNodeKeysKnown()
 	{
@@ -174,6 +190,7 @@ public class RCServer implements Runnable{
 
 	public void cs_enter()
 	{
+		requestAllKeys();
 		while(!isAllNodeKeysKnown())
 		{
 			Thread.sleep(2000);
@@ -242,11 +259,11 @@ public class RCServer implements Runnable{
 		Message message;
 
 		//Already known hosts - MAY BE USEFUL FO LIST OF GOT RESPONSE NODES
-		ArrayList<Host> currentAdjList = new ArrayList<Host>();
+		/*ArrayList<Host> currentAdjList = new ArrayList<Host>();
 		for(int nodeID : nodeMap.keySet())
 		{
 			currentAdjList.add(nodeMap.get(nodeID));
-		}
+		}*/
 		int i=0;
 		while(size>0)
 		{
