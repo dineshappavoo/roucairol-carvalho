@@ -9,14 +9,16 @@ import java.util.ArrayList;
  * @author Dany
  *
  */
+enum MessageType {
+	REQUEST_KEY,RESPONSE_KEY,RESPONSE_AND_REQUEST_KEY,TERMINATION_REQUEST, TERMINATION_RESPONSE;
+}
 public class Message implements Serializable{
-	String messageType = "";
+	
+	MessageType messageType;
 	Host nodeInfo;
-	ArrayList<Host> knownHosts;
-	public Message(String messageType, Host nodeInfo, ArrayList<Host> knownHosts)
+	public Message(MessageType messageType, Host nodeInfo)
 	{
 		this.messageType = messageType;
 		this.nodeInfo = nodeInfo;
-		this.knownHosts = knownHosts;
 	}
 }

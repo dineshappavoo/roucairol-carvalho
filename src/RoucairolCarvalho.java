@@ -14,11 +14,19 @@ public class RoucairolCarvalho {
 
 	private static HashMap<Integer, Host> nodeMap;
 	private static int noOfNodes;
-	//private static int nodeId;
+	private static int nodeId;
 	private static Random rand;//= new Random();
 	private static int noOfCriticalSectionRequests;
 	private static int meanDelayInCriticalSection;
 	private static int durationOfCriticalSection;
+	private static int nWaitingForTerminationResponseCount=0;
+	
+	public void startServer()
+	{
+		RCServer rCServer = new RCServer(nodeMap, nodeId, nWaitingForTerminationResponseCount);
+
+		new Thread(rCServer).start();
+	}
 
 	public HashMap<Integer, Host> constructGraph(String fileName, int nodeId) throws FileNotFoundException
 	{
@@ -51,7 +59,7 @@ public class RoucairolCarvalho {
 						hostName = scanner.next()+".utdallas.edu";
 						hostPort = scanner.nextInt();
 
-						if(nodeMap.get(hostId)!=null || hostId != nodeId)
+						if(nodeMap.get(hostId)==null)// || hostId != nodeId)
 						{
 							if(hostId<=endNode && hostId >=startNode)
 							{
@@ -107,7 +115,7 @@ public class RoucairolCarvalho {
 		return randomNum;
 	}
 	
-	public String currentTime()
+	public String sTime()
 	{
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
 		return timeStamp;
@@ -119,14 +127,16 @@ public class RoucairolCarvalho {
 		for(int nodeId : nodeMap.keySet())
 		{
 			host = nodeMap.get(nodeId);
-			System.out.println("[INFO]	["+currentTime()+"]	Host Id "+nodeId+"  Name : "+host.hostName+"  port : "+host.hostPort+"  Key Known?  "+host.keyKnown);
+			System.out.println("[INFO]	["+sTime()+"]	Host Id "+nodeId+"  Name : "+host.hostName+"  port : "+host.hostPort+"  Key Known?  "+host.keyKnown);
 		}
 	}
 	
 	public void simulateRoucairolCarvalho() throws FileNotFoundException
 	{
+		
 		HashMap<Integer, Host> nMap = constructGraph("/Users/Dany/Documents/FALL-2013-COURSES/Imp_Data_structures/workspace/roucairol-carvalho/src/config.txt", 5);
 		System.out.println("No Of CS : "+noOfCriticalSectionRequests+"  Mean Delay : "+meanDelayInCriticalSection+"  Duration Of CS : "+durationOfCriticalSection);
+		//startServer();
 	}
 
 	/**
@@ -135,6 +145,9 @@ public class RoucairolCarvalho {
 	 */
 	public static void main(String[] args) throws FileNotFoundException {
 		// TODO Auto-generated method stub
+		if(args.length > 0) {
+			nodeId = Integer.parseInt(args[0]);
+		}
 		RoucairolCarvalho rcObject = new RoucairolCarvalho();
 		rcObject.simulateRoucairolCarvalho();
 	}

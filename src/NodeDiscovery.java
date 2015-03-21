@@ -22,9 +22,9 @@ public class NodeDiscovery{
 
 	public void initiateDiscovery()
 	{
-		SctpServer sctpServer = new SctpServer(nodeMap, nodeId, nWaitingForResponseCount);
+		RCServer rCServer = new RCServer(nodeMap, nodeId, nWaitingForResponseCount);
 
-		new Thread(sctpServer).start();
+		new Thread(rCServer).start();
 	}
 
 	public HashMap<Integer, Host> constructGraph(String fileName, int nodeId) throws FileNotFoundException
