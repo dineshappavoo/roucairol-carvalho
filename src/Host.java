@@ -15,13 +15,15 @@ public class Host implements Serializable{
 	public String hostName;
 	public int hostPort;
 	public boolean keyKnown;
+	public boolean isRequested;
 	
-	public Host(int hostId, String hostName, int hostPort, boolean keyKnown)
+	public Host(int hostId, String hostName, int hostPort, boolean keyKnown, boolean isRequested)
 	{
 		this.hostId = hostId;
 		this.hostName = hostName;
 		this.hostPort = hostPort;
 		this.keyKnown = keyKnown;
+		this.isRequested = isRequested;
 	}
 	
 	public Host()
@@ -30,6 +32,7 @@ public class Host implements Serializable{
 		this.hostName = "";
 		this.hostPort = 0;	
 		this.keyKnown = false;
+		this.isRequested = false;
 	}
 }
 

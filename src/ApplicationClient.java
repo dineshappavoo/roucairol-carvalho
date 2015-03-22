@@ -19,7 +19,8 @@ public class ApplicationClient implements Runnable{
 	private static int noOfCriticalSectionRequests = 2;
 	private static int meanDelayInCriticalSection = 10000;
 	private static int durationOfCriticalSection = 10000;
-	private RoucairolCarvalho rcObj;
+	private RoucairolCarvalho rcObj = new RoucairolCarvalho();
+
 	public ApplicationClient()
 	{
 		//this.rCServer = rCServer;
@@ -29,10 +30,9 @@ public class ApplicationClient implements Runnable{
 	{
 		try
 		{	
-			rcObj = new RoucairolCarvalho();
 			Thread.sleep(10000);
 
-			for(int i=0;i<=noOfCriticalSectionRequests;i++)
+			for(int i=0;i<noOfCriticalSectionRequests;i++)
 			{
 				//TODO: call server csEnter
 				rcObj.cs_enter();
@@ -69,7 +69,9 @@ public class ApplicationClient implements Runnable{
 			}
 			else
 			{
-				System.out.println("[INFO]	["+sTime()+"]	Node is in Critical Section");
+				System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	NODE IS IN CRITICAL SECTION	| 	?????=====****");
+				System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
+
 
 				long startTime = System.currentTimeMillis();
 				long currentTime = System.currentTimeMillis();
@@ -89,9 +91,12 @@ public class ApplicationClient implements Runnable{
 		finally
 		{
 			try {
+				if(lock != null)
+				{
 				if(lock.isValid())
 				{
 					lock.release();
+				}
 				}
 				out.close();
 			} catch (IOException e) {

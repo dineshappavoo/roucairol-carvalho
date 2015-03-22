@@ -26,7 +26,7 @@ public class RoucairolCarvalho {
 	protected static int nWaitingForTerminationResponseCount=0;
 	protected static boolean isInCriticalSection = false;
 	protected static boolean requestForCriticalSection = false;
-	protected PriorityQueue<Message> minHeap = getPriorityQueue();
+	protected static PriorityQueue<Message> minHeap = getPriorityQueue();
 	protected AtomicInteger currentNodeCSEnterTimestamp = new AtomicInteger(0);
 	
 	static RCServer rCServer = new RCServer();
@@ -53,22 +53,25 @@ public class RoucairolCarvalho {
 				ex.printStackTrace();
 			}
 		}
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+" Entering into Critical Section");
+		System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
+		System.out.println("[INFO]	["+sTime()+"]	****=====		NODE "+nodeId+" IS GETTING INTO CRITICAL SECTION		=====****");
 		isInCriticalSection = true;
 		return;
 	}
 
 	public void cs_leave()
 	{
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived to leave from Critical Section");
 		//make the isInCriticalSection boolean as false
 		isInCriticalSection = false;
 		rCServer.startRCClients(minHeap, MessageType.RESPONSE_KEY);
 		minHeap = getPriorityQueue();
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
 		return;
 	}
 	
 
-	public PriorityQueue<Message> getPriorityQueue()
+	public static PriorityQueue<Message> getPriorityQueue()
 	{
 		PriorityQueue<Message> queue = new PriorityQueue<Message>(11, new Comparator<Message>()
 				{
@@ -122,10 +125,10 @@ public class RoucairolCarvalho {
 						{
 							if(hostId<=endNode && hostId >=startNode)
 							{
-								nodeMap.put(hostId, new Host(hostId, hostName, hostPort, false));
+								nodeMap.put(hostId, new Host(hostId, hostName, hostPort, false, false));
 							}else
 							{
-								nodeMap.put(hostId, new Host(hostId, hostName, hostPort, false));
+								nodeMap.put(hostId, new Host(hostId, hostName, hostPort, false, false));
 							}
 						}
 					}
@@ -195,7 +198,7 @@ public class RoucairolCarvalho {
 		//HashMap<Integer, Host> nMap = constructGraph("/Users/Dany/Documents/FALL-2013-COURSES/Imp_Data_structures/workspace/roucairol-carvalho/src/config.txt", nodeId);
 		HashMap<Integer, Host> nMap = constructGraph("/home/004/d/dx/dxa132330/advanced-operating-system/projects/roucairol-carvalho/config.txt", nodeId);
 
-		System.out.println("No Of CS : "+noOfCriticalSectionRequests+"  Mean Delay : "+meanDelayInCriticalSection+"  Duration Of CS : "+durationOfCriticalSection);
+		System.out.println("[INFO]	["+sTime()+"]	No Of CS : "+noOfCriticalSectionRequests+"  Mean Delay : "+meanDelayInCriticalSection+"  Duration Of CS : "+durationOfCriticalSection);
 		startServer();
 	}
 

@@ -75,11 +75,11 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 				ByteArrayInputStream bin = new ByteArrayInputStream(byteBuffer.array());
 				ObjectInputStream oin = new ObjectInputStream(bin);
 				Message messageObj = (Message) oin.readObject();	
-
-				System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Requested Node Id "+messageObj.nodeInfo.hostId);
+				int hostId;
 
 				if(messageObj.messageType  == MessageType.REQUEST_KEY)
 				{
+					System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Requested Node Id "+messageObj.nodeInfo.hostId);
 
 					if(isInCriticalSection)
 					{
@@ -91,31 +91,40 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 						{
 							if(messageObj.timeStamp.get()==currentNodeCSEnterTimestamp.get())
 							{
-								if(nodeId>messageObj.nodeInfo.hostId)
+								if(nodeId<messageObj.nodeInfo.hostId)
 								{
-									
+									minHeap.add(messageObj);
+								}else
+								{
+									hostId = messageObj.nodeInfo.hostId;
+									nodeMap.get(hostId).keyKnown = false;
+									startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_AND_REQUEST_KEY);   //REsponse_and_request key in case there is a CS request pending
 								}
 							}else
 							{
-							minHeap.add(messageObj);
+								minHeap.add(messageObj);
 							}
 						}						
 						else
 						{
+							hostId = messageObj.nodeInfo.hostId;
+							nodeMap.get(hostId).keyKnown = false;
 							startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_AND_REQUEST_KEY);   //REsponse_and_request key in case there is a CS request pending
 						}
 					}				
 					else
 					{
 						//preEmptQueue.add(messageObj.nodeInfo);
-						int hostid = messageObj.nodeInfo.hostId;
-						nodeMap.get(hostid).keyKnown = false;
+						hostId = messageObj.nodeInfo.hostId;
+						nodeMap.get(hostId).keyKnown = false;
 						startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_KEY);   //REsponse_and_request key in case there is a CS request pending
 					}
 				}else if(messageObj.messageType  == MessageType.RESPONSE_KEY)
 				{
-					int hostid = messageObj.nodeInfo.hostId;
-					nodeMap.get(hostid).keyKnown = true;
+					System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Responded Node Id "+messageObj.nodeInfo.hostId);
+
+					hostId = messageObj.nodeInfo.hostId;
+					nodeMap.get(hostId).keyKnown = true;
 
 					if(!isAllNodeKeysKnown())
 					{
@@ -124,22 +133,25 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 
 				}else if(messageObj.messageType == MessageType.RESPONSE_AND_REQUEST_KEY)
 				{
-					//This case we don't have to compare the timestamp because the other node is sending 'RESPONSE_AND_REQUEST_KEY' which mean the timestamp of other node is greater than the current
+					System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Responded and Requested Node Id "+messageObj.nodeInfo.hostId);
+
+					//This case we don't have to compare the timestamp because the other node is sending 'RESPONSE_AND_REQUEST_KEY' which means the timestamp of other node is greater than the current
 					minHeap.add(messageObj);
-					int hostid = messageObj.nodeInfo.hostId;
-					nodeMap.get(hostid).keyKnown = true;
+					hostId = messageObj.nodeInfo.hostId;
+					nodeMap.get(hostId).keyKnown = true;				
 
 				}else if(messageObj.messageType == MessageType.TERMINATION_REQUEST)
 				{
+					System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Requested Node Id "+messageObj.nodeInfo.hostId);
 
 				}else if(messageObj.messageType == MessageType.TERMINATION_RESPONSE)
 				{
-
+					System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Requested Node Id "+messageObj.nodeInfo.hostId);
 				}
 
 				//System.out.println("WAITING COUNT : "+nWaitingForTerminationResponseCount);
 
-				Thread.sleep(8000);
+				Thread.sleep(6000);
 				/*
 				//Verify whether we found all nodes in this network
 				System.out.println("WAITING COUNT FINAL: "+nWaitingForTerminationResponseCount);
@@ -171,9 +183,10 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 		for(int nId : nodeMap.keySet())
 		{
 			host = nodeMap.get(nId);
-			if(!host.keyKnown && nodeId != host.hostId)
+			if(!host.keyKnown && nodeId != host.hostId && nodeMap.get(host.hostId).isRequested != true)
 			{
 				startRCClient(host, MessageType.REQUEST_KEY);
+				nodeMap.get(host.hostId).isRequested=true;
 			}
 		}
 	}
@@ -228,21 +241,34 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 
 	public void startRCClient(Host host, MessageType sMessageType)
 	{		
-		RCClient  rCClient;
-		Message message;
-		currentNodeCSEnterTimestamp.incrementAndGet();
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Starting the client to request for a key to "+host.hostName+" at port "+host.hostPort);
+		if(host.hostId != nodeId)
+		{
+			if(sMessageType == MessageType.RESPONSE_AND_REQUEST_KEY && nodeMap.get(host.hostId).isRequested == true)
+			{
+				sMessageType = MessageType.RESPONSE_KEY; 
+			}
 
-		message = new Message(currentNodeCSEnterTimestamp, sMessageType, nodeMap.get(nodeId));
-		rCClient = new RCClient(host, message);
-		new Thread(rCClient).start();
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  client requested for a key to "+host.hostName);
+			if(sMessageType == MessageType.REQUEST_KEY && nodeMap.get(host.hostId).isRequested == true)
+			{
+				return;
+			}
+			RCClient  rCClient;
+			Message message;
+			currentNodeCSEnterTimestamp.incrementAndGet();
+			System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Starting the client to request for a key to "+host.hostName+" at port "+host.hostPort);
+
+			message = new Message(currentNodeCSEnterTimestamp, sMessageType, nodeMap.get(nodeId));
+			rCClient = new RCClient(host, message);
+			new Thread(rCClient).start();
+			System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  client requested for a key to "+host.hostName);
+		}
 
 	}
 
 	public void startRCClients(PriorityQueue<Message> minHeap, MessageType sMessageType)
 	{		
 		int size = minHeap.size();
+		System.out.println("Min Heap Size : "+size);
 		int nNumOfThreads=size;
 		Thread[] tThreads = new Thread[nNumOfThreads];
 		RCClient  rCClient;
@@ -255,23 +281,39 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 			currentAdjList.add(nodeMap.get(nodeID));
 		}*/
 		int i=0;
-		while(size>0)
+		while(minHeap.size()>0)
 		{
-			Host host = minHeap.poll().nodeInfo;
-			if (nodeId!=host.hostId)
+			//System.out.println("Size inside while loop : "+size);
+			Message m = minHeap.poll();
+			if(m!=null)
 			{
-				//System.out.println("CLIENT CALL TYPE : "+sMessageType);
-				//Increment the count only on requests
-				if(sMessageType == MessageType.TERMINATION_REQUEST)
+				Host host = m.nodeInfo;
+				System.out.println("Node Name : "+host.hostName);
+				if (nodeId!=host.hostId)
 				{
-					nWaitingForTerminationResponseCount++;
+					//System.out.println("CLIENT CALL TYPE : "+sMessageType);
+					//Increment the count only on requests
+					if(sMessageType == MessageType.TERMINATION_REQUEST)
+					{
+						nWaitingForTerminationResponseCount++;
+					}
+					if(sMessageType == MessageType.RESPONSE_KEY || sMessageType == MessageType.RESPONSE_AND_REQUEST_KEY)
+					{
+						nodeMap.get(host.hostId).keyKnown = false;
+						if(sMessageType == MessageType.RESPONSE_AND_REQUEST_KEY)
+						{
+							nodeMap.get(host.hostId).isRequested=true;
+						}
+					}
+					currentNodeCSEnterTimestamp.incrementAndGet();
+					message = new Message(currentNodeCSEnterTimestamp, sMessageType, nodeMap.get(nodeId));
+					System.out.println("Message Type : "+message.messageType);
+
+					rCClient = new RCClient(host, message);
+					tThreads[i] = new Thread(rCClient);
+					tThreads[i].start();
+					i++;
 				}
-				currentNodeCSEnterTimestamp.incrementAndGet();
-				message = new Message(currentNodeCSEnterTimestamp, sMessageType, nodeMap.get(nodeId));
-				rCClient = new RCClient(host, message);
-				tThreads[i] = new Thread(rCClient);
-				tThreads[i].start();
-				i++;
 			}
 		}
 	}
