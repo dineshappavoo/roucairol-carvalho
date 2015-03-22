@@ -28,13 +28,14 @@ public class RoucairolCarvalho {
 	protected static boolean requestForCriticalSection = false;
 	protected static PriorityQueue<Message> minHeap = getPriorityQueue();
 	protected AtomicInteger currentNodeCSEnterTimestamp = new AtomicInteger(0);
-	
+	protected static int count = 0;
+	protected static  ApplicationClient oAppClient;
 	static RCServer rCServer = new RCServer();
 	public void startServer()
 	{
 		//rCServer = new RCServer();
 		new Thread(rCServer).start();
-		ApplicationClient oAppClient = new ApplicationClient();
+		oAppClient = new ApplicationClient();
 		new Thread(oAppClient).start();
 	}
 	
@@ -67,6 +68,10 @@ public class RoucairolCarvalho {
 		rCServer.startRCClients(minHeap, MessageType.RESPONSE_KEY);
 		minHeap = getPriorityQueue();
 		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
+		count++;
+		if(count == noOfCriticalSectionRequests ){
+			rCServer.sendTermination();
+		}
 		return;
 	}
 	

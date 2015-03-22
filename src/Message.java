@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  */
 enum MessageType {
-	REQUEST_KEY,RESPONSE_KEY,RESPONSE_AND_REQUEST_KEY,TERMINATION_REQUEST, TERMINATION_RESPONSE;
+	REQUEST_KEY,RESPONSE_KEY,RESPONSE_AND_REQUEST_KEY,TERMINATION_MESSAGE;
 }
 public class Message implements Serializable{
 	AtomicInteger timeStamp;

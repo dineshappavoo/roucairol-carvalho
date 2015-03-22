@@ -16,6 +16,7 @@ public class Host implements Serializable{
 	public int hostPort;
 	public boolean keyKnown;
 	public boolean isRequested;
+	public boolean isTerminated;
 	
 	public Host(int hostId, String hostName, int hostPort, boolean keyKnown, boolean isRequested)
 	{
@@ -24,6 +25,7 @@ public class Host implements Serializable{
 		this.hostPort = hostPort;
 		this.keyKnown = keyKnown;
 		this.isRequested = isRequested;
+		this.isTerminated = false;
 	}
 	
 	public Host()
@@ -33,6 +35,7 @@ public class Host implements Serializable{
 		this.hostPort = 0;	
 		this.keyKnown = false;
 		this.isRequested = false;
+		this.isTerminated = false;
 	}
 }
 
