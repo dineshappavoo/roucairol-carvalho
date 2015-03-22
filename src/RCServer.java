@@ -87,11 +87,20 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 
 					}else if(requestForCriticalSection)
 					{
-						if(messageObj.timeStamp.get()>currentNodeCSEnterTimestamp.get())
+						if(messageObj.timeStamp.get()>=currentNodeCSEnterTimestamp.get())
 						{
-
+							if(messageObj.timeStamp.get()==currentNodeCSEnterTimestamp.get())
+							{
+								if(nodeId>messageObj.nodeInfo.hostId)
+								{
+									
+								}
+							}else
+							{
 							minHeap.add(messageObj);
-						}else
+							}
+						}						
+						else
 						{
 							startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_AND_REQUEST_KEY);   //REsponse_and_request key in case there is a CS request pending
 						}

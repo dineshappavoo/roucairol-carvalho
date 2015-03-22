@@ -38,7 +38,6 @@ public class ApplicationClient implements Runnable{
 				rcObj.cs_enter();
 				csExecute();
 				Thread.sleep(meanDelayInCriticalSection);
-				rcObj.cs_leave();
 
 			}
 		} catch(Exception e)
@@ -107,6 +106,8 @@ public class ApplicationClient implements Runnable{
 	public void csLeave()
 	{
 		//TODO: call server csLeave
+		rcObj.cs_leave();
+
 	}
 
 	public void run()

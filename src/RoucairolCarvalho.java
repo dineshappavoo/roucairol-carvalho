@@ -40,7 +40,7 @@ public class RoucairolCarvalho {
 	
 	public void cs_enter()
 	{
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request for Entering into Critical Section");
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
 		requestForCriticalSection = true;
 		//currentNodeCSEnterTimestamp.incrementAndGet();	
 		rCServer.requestAllKeys();

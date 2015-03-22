@@ -8,8 +8,8 @@
 # Number of nodes
 p 2    	
 	
-n	0				dc01		7594	
-n	1				dc33		8985	
+n	0				dc01		4594	
+n	1				dc33		5005	
 
 cscount 2       
 meandelay 10        
