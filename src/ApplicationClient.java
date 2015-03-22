@@ -89,7 +89,10 @@ public class ApplicationClient implements Runnable{
 		finally
 		{
 			try {
-				lock.release();
+				if(lock.isValid())
+				{
+					lock.release();
+				}
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();
