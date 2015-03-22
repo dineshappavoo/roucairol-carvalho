@@ -6,28 +6,40 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileLock;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * @author Rahul
  *
  */
-public class ApplicationClient {
+public class ApplicationClient implements Runnable{
 	//Hardcoded for now
 	//TODO: Set the below variables from the config file
-	private static int noOfCriticalSectionRequests;
-	private static int meanDelayInCriticalSection;
-	private static int durationOfCriticalSection;
+	private static int noOfCriticalSectionRequests = 2;
+	private static int meanDelayInCriticalSection = 10000;
+	private static int durationOfCriticalSection = 10000;
+	private RoucairolCarvalho rcObj;
+	public ApplicationClient()
+	{
+		//this.rCServer = rCServer;
+	}
 
-	public void csEnter()
+	public void csEnterInitiate()
 	{
 		try
-		{
+		{	
+			rcObj = new RoucairolCarvalho();
+			Thread.sleep(10000);
+
 			for(int i=0;i<=noOfCriticalSectionRequests;i++)
 			{
 				//TODO: call server csEnter
-
+				rcObj.cs_enter();
 				csExecute();
 				Thread.sleep(meanDelayInCriticalSection);
+				rcObj.cs_leave();
+
 			}
 		} catch(Exception e)
 		{
@@ -36,6 +48,12 @@ public class ApplicationClient {
 
 	}
 
+	public String sTime()
+	{
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+		return timeStamp;
+	}
+	
 	public void csExecute()
 	{
 		File file = new File("temp.txt");
@@ -51,6 +69,8 @@ public class ApplicationClient {
 			}
 			else
 			{
+				System.out.println("[INFO]	["+sTime()+"]	Node is in Critical Section");
+
 				long startTime = System.currentTimeMillis();
 				long currentTime = System.currentTimeMillis();
 				BufferedOutputStream bw = new BufferedOutputStream(out);
@@ -80,9 +100,14 @@ public class ApplicationClient {
 
 		}
 	}
-	
+
 	public void csLeave()
 	{
 		//TODO: call server csLeave
+	}
+
+	public void run()
+	{
+		csEnterInitiate();
 	}
 }

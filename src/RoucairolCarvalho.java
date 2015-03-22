@@ -2,9 +2,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Dany
@@ -12,21 +15,77 @@ import java.util.Scanner;
  */
 public class RoucairolCarvalho {
 
-	private static HashMap<Integer, Host> nodeMap;
 	private static int noOfNodes;
-	private static int nodeId;
+	protected static int nodeId;
 	private static Random rand;//= new Random();
 	private static int noOfCriticalSectionRequests;
 	private static int meanDelayInCriticalSection;
 	private static int durationOfCriticalSection;
-	private static int nWaitingForTerminationResponseCount=0;
 	
+	protected static HashMap<Integer, Host> nodeMap;
+	protected static int nWaitingForTerminationResponseCount=0;
+	protected static boolean isInCriticalSection = false;
+	protected static boolean requestForCriticalSection = false;
+	protected PriorityQueue<Message> minHeap = getPriorityQueue();
+	protected AtomicInteger currentNodeCSEnterTimestamp = new AtomicInteger(0);
+	
+	static RCServer rCServer = new RCServer();
 	public void startServer()
 	{
-		RCServer rCServer = new RCServer(nodeMap, nodeId, nWaitingForTerminationResponseCount);
-
+		//rCServer = new RCServer();
 		new Thread(rCServer).start();
+		ApplicationClient oAppClient = new ApplicationClient();
+		new Thread(oAppClient).start();
 	}
+	
+	public void cs_enter()
+	{
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request for Entering into Critical Section");
+		requestForCriticalSection = true;
+		//currentNodeCSEnterTimestamp.incrementAndGet();	
+		rCServer.requestAllKeys();
+		while(!rCServer.isAllNodeKeysKnown())
+		{
+			try {
+				Thread.sleep(2000);
+			}catch(InterruptedException ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+" Entering into Critical Section");
+		isInCriticalSection = true;
+		return;
+	}
+
+	public void cs_leave()
+	{
+		//make the isInCriticalSection boolean as false
+		isInCriticalSection = false;
+		rCServer.startRCClients(minHeap, MessageType.RESPONSE_KEY);
+		minHeap = getPriorityQueue();
+		return;
+	}
+	
+
+	public PriorityQueue<Message> getPriorityQueue()
+	{
+		PriorityQueue<Message> queue = new PriorityQueue<Message>(11, new Comparator<Message>()
+				{
+			public int compare(Message o1, Message o2)
+			{
+				AtomicInteger t1 = o1.timeStamp;
+				AtomicInteger t2 = o2.timeStamp;
+				if(t1.get()>=t2.get())
+					return 1;
+				else
+					return -1;
+			}
+				}
+				);
+		return queue;	
+	}
+
 
 	public HashMap<Integer, Host> constructGraph(String fileName, int nodeId) throws FileNotFoundException
 	{
@@ -63,7 +122,7 @@ public class RoucairolCarvalho {
 						{
 							if(hostId<=endNode && hostId >=startNode)
 							{
-								nodeMap.put(hostId, new Host(hostId, hostName, hostPort, true));
+								nodeMap.put(hostId, new Host(hostId, hostName, hostPort, false));
 							}else
 							{
 								nodeMap.put(hostId, new Host(hostId, hostName, hostPort, false));
@@ -71,17 +130,17 @@ public class RoucairolCarvalho {
 						}
 					}
 				}
-				
+
 				if((checker=scanner.next()).equals("cscount") && (!(checker.equals("#"))))
 				{
 					noOfCriticalSectionRequests = scanner.nextInt();
 				}
-				
+
 				if((checker=scanner.next()).equals("meandelay") && (!(checker.equals("#"))))
 				{
 					meanDelayInCriticalSection = scanner.nextInt();
 				}
-				
+
 				if((checker=scanner.next()).equals("duration") && (!(checker.equals("#"))))
 				{
 					durationOfCriticalSection = scanner.nextInt();
@@ -114,7 +173,7 @@ public class RoucairolCarvalho {
 
 		return randomNum;
 	}
-	
+
 	public String sTime()
 	{
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
@@ -130,13 +189,14 @@ public class RoucairolCarvalho {
 			System.out.println("[INFO]	["+sTime()+"]	Host Id "+nodeId+"  Name : "+host.hostName+"  port : "+host.hostPort+"  Key Known?  "+host.keyKnown);
 		}
 	}
-	
+
 	public void simulateRoucairolCarvalho() throws FileNotFoundException
 	{
-		
-		HashMap<Integer, Host> nMap = constructGraph("/Users/Dany/Documents/FALL-2013-COURSES/Imp_Data_structures/workspace/roucairol-carvalho/src/config.txt", 5);
+		//HashMap<Integer, Host> nMap = constructGraph("/Users/Dany/Documents/FALL-2013-COURSES/Imp_Data_structures/workspace/roucairol-carvalho/src/config.txt", nodeId);
+		HashMap<Integer, Host> nMap = constructGraph("/home/004/d/dx/dxa132330/advanced-operating-system/projects/roucairol-carvalho/config.txt", nodeId);
+
 		System.out.println("No Of CS : "+noOfCriticalSectionRequests+"  Mean Delay : "+meanDelayInCriticalSection+"  Duration Of CS : "+durationOfCriticalSection);
-		//startServer();
+		startServer();
 	}
 
 	/**

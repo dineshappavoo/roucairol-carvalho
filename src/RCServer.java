@@ -21,22 +21,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
-public class RCServer implements Runnable{
+import java.util.concurrent.atomic.AtomicInteger;
+public class RCServer extends RoucairolCarvalho implements Runnable{
 	public static final int MESSAGE_SIZE = 1000;
+	//private HashMap<Integer, Host> nodeMap;
+	//private int nodeId;
+	//private int nWaitingForTerminationResponseCount;
 
-
-	private HashMap<Integer, Host> nodeMap;
-	private int nodeId;
-	private int nWaitingForTerminationResponseCount;
-	private static boolean isInCriticalSection = false;
-	private PriorityQueue<Message> minHeap;
-	//private static ArrayList<Host> preEmptQueue;
-
-	public RCServer(HashMap<Integer, Host> nodeMap, int nodeId, int nWaitingForTerminationResponseCount)
+	public RCServer()
 	{
-		this.nodeMap = nodeMap; 
-		this.nodeId = nodeId;
-		this.nWaitingForTerminationResponseCount = nWaitingForTerminationResponseCount;
+		//this.nodeMap = nodeMap; 
+		//this.nodeId = nodeId;
+		//this.nWaitingForTerminationResponseCount = nWaitingForTerminationResponseCount;
 	}
 
 	public void go()
@@ -49,8 +45,10 @@ public class RCServer implements Runnable{
 		{
 			//Open a server channel
 			SctpServerChannel sctpServerChannel = SctpServerChannel.open();
+			int port = nodeMap.get(nodeId).hostPort;
+			System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"	Port : "+port);
 			//Create a socket addess in the current machine at port 5000
-			InetSocketAddress serverAddr = new InetSocketAddress(nodeMap.get(nodeId).hostPort);
+			InetSocketAddress serverAddr = new InetSocketAddress(port);
 			//Bind the channel's socket to the server in the current machine at port 5000
 			sctpServerChannel.bind(serverAddr);
 
@@ -78,19 +76,32 @@ public class RCServer implements Runnable{
 				ObjectInputStream oin = new ObjectInputStream(bin);
 				Message messageObj = (Message) oin.readObject();	
 
+				System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Requested Node Id "+messageObj.nodeInfo.hostId);
+
 				if(messageObj.messageType  == MessageType.REQUEST_KEY)
 				{
-					System.out.println("[INFO]	["+sTime()+"]	Request Node Id "+messageObj.nodeInfo.hostId+"  SERVER STARTED");
 
-					if(!isInCriticalSection)
-					{
-						int hostid = messageObj.nodeInfo.hostId;
-						nodeMap.get(hostid).keyKnown = false;
-						startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_KEY);
-					}else
+					if(isInCriticalSection)
 					{
 						minHeap.add(messageObj);
+
+					}else if(requestForCriticalSection)
+					{
+						if(messageObj.timeStamp.get()>currentNodeCSEnterTimestamp.get())
+						{
+
+							minHeap.add(messageObj);
+						}else
+						{
+							startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_AND_REQUEST_KEY);   //REsponse_and_request key in case there is a CS request pending
+						}
+					}				
+					else
+					{
 						//preEmptQueue.add(messageObj.nodeInfo);
+						int hostid = messageObj.nodeInfo.hostId;
+						nodeMap.get(hostid).keyKnown = false;
+						startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_KEY);   //REsponse_and_request key in case there is a CS request pending
 					}
 				}else if(messageObj.messageType  == MessageType.RESPONSE_KEY)
 				{
@@ -104,9 +115,10 @@ public class RCServer implements Runnable{
 
 				}else if(messageObj.messageType == MessageType.RESPONSE_AND_REQUEST_KEY)
 				{
+					//This case we don't have to compare the timestamp because the other node is sending 'RESPONSE_AND_REQUEST_KEY' which mean the timestamp of other node is greater than the current
+					minHeap.add(messageObj);
 					int hostid = messageObj.nodeInfo.hostId;
 					nodeMap.get(hostid).keyKnown = true;
-
 
 				}else if(messageObj.messageType == MessageType.TERMINATION_REQUEST)
 				{
@@ -116,10 +128,10 @@ public class RCServer implements Runnable{
 
 				}
 
-				System.out.println("WAITING COUNT : "+nWaitingForTerminationResponseCount);
+				//System.out.println("WAITING COUNT : "+nWaitingForTerminationResponseCount);
 
 				Thread.sleep(8000);
-
+				/*
 				//Verify whether we found all nodes in this network
 				System.out.println("WAITING COUNT FINAL: "+nWaitingForTerminationResponseCount);
 
@@ -128,7 +140,7 @@ public class RCServer implements Runnable{
 					System.out.println("DISCOVERED ALL NODES IN THE NETWORK");
 					writeOutputToFile();
 					System.exit(0);
-				}
+				}*/
 			}
 		}
 		catch(IOException ex)
@@ -143,24 +155,7 @@ public class RCServer implements Runnable{
 		}
 	}
 
-	public PriorityQueue<Message> getPriorityQueue()
-	{
-		PriorityQueue<Message> queue = new PriorityQueue<Message>(11, new Comparator<Message>()
-				{
-			public int compare(Message o1, Message o2)
-			{
-				long t1=o1.timeStamp;
-				long t2=o2.timeStamp;
-				if(t1>=t2)
-					return 1;
-				else
-					return -1;
-			}
-				}
-				);
-		return queue;	
-	}
-	
+
 	public void requestAllKeys()
 	{
 		Host host;
@@ -180,7 +175,7 @@ public class RCServer implements Runnable{
 		for(int nId : nodeMap.keySet())
 		{
 			host = nodeMap.get(nId);
-			if(!host.keyKnown)
+			if(!host.keyKnown && host.hostId != nodeId)
 			{
 				return false;
 			}
@@ -188,25 +183,6 @@ public class RCServer implements Runnable{
 		return true;
 	}
 
-	public void cs_enter()
-	{
-		requestAllKeys();
-		while(!isAllNodeKeysKnown())
-		{
-			Thread.sleep(2000);
-		}
-		isInCriticalSection = true;
-		return;
-	}
-
-	public void cs_leave()
-	{
-		//make the isInCriticalSection boolean as false
-		isInCriticalSection = false;
-		startRCClients(minHeap, MessageType.RESPONSE_KEY);
-		minHeap = getPriorityQueue();
-		return;
-	}
 
 	public String sTime()
 	{
@@ -245,9 +221,14 @@ public class RCServer implements Runnable{
 	{		
 		RCClient  rCClient;
 		Message message;
-		message = new Message(System.currentTimeMillis(), sMessageType, host);
+		currentNodeCSEnterTimestamp.incrementAndGet();
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Starting the client to request for a key to "+host.hostName+" at port "+host.hostPort);
+
+		message = new Message(currentNodeCSEnterTimestamp, sMessageType, nodeMap.get(nodeId));
 		rCClient = new RCClient(host, message);
 		new Thread(rCClient).start();
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  client requested for a key to "+host.hostName);
+
 	}
 
 	public void startRCClients(PriorityQueue<Message> minHeap, MessageType sMessageType)
@@ -276,7 +257,8 @@ public class RCServer implements Runnable{
 				{
 					nWaitingForTerminationResponseCount++;
 				}
-				message = new Message(System.currentTimeMillis(), sMessageType, nodeMap.get(nodeId));
+				currentNodeCSEnterTimestamp.incrementAndGet();
+				message = new Message(currentNodeCSEnterTimestamp, sMessageType, nodeMap.get(nodeId));
 				rCClient = new RCClient(host, message);
 				tThreads[i] = new Thread(rCClient);
 				tThreads[i].start();
