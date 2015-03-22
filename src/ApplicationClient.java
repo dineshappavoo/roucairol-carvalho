@@ -37,6 +37,7 @@ public class ApplicationClient implements Runnable{
 				//TODO: call server csEnter
 				rcObj.cs_enter();
 				csExecute();
+				rcObj.cs_leave();
 				Thread.sleep(meanDelayInCriticalSection);
 
 			}
