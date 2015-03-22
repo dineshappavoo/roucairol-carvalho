@@ -89,7 +89,7 @@ public class ApplicationClient implements Runnable{
 		finally
 		{
 			try {
-				if(lock.isValid())
+				if(lock != null && lock.isValid())
 				{
 					lock.release();
 				}
