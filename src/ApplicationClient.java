@@ -53,7 +53,7 @@ public class ApplicationClient implements Runnable{
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
 		return timeStamp;
 	}
-	
+
 	public void csExecute()
 	{
 		File file = new File("temp.txt");
@@ -80,6 +80,7 @@ public class ApplicationClient implements Runnable{
 				while(currentTime-startTime<durationOfCriticalSection)
 				{
 					bw.write(lineNumber.toString().getBytes());
+					Thread.sleep(1000);
 					currentTime = System.currentTimeMillis();
 				}
 				bw.close();
@@ -100,10 +101,6 @@ public class ApplicationClient implements Runnable{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			finally {
-				csLeave();
-			}
-
 		}
 	}
 
