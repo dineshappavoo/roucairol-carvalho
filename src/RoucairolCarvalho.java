@@ -18,26 +18,28 @@ public class RoucairolCarvalho {
 	private static int noOfNodes;
 	protected static int nodeId;
 	private static Random rand;//= new Random();
-	private static int noOfCriticalSectionRequests;
+	protected static int noOfCriticalSectionRequests;
 	private static int meanDelayInCriticalSection;
 	private static int durationOfCriticalSection;
-	
+	protected static Boolean isTerminationSent = false;
+
 	protected static HashMap<Integer, Host> nodeMap;
 	protected static int nWaitingForTerminationResponseCount=0;
 	protected static boolean isInCriticalSection = false;
 	protected static boolean requestForCriticalSection = false;
 	protected static PriorityQueue<Message> minHeap = getPriorityQueue();
 	protected AtomicInteger currentNodeCSEnterTimestamp = new AtomicInteger(0);
-	
+	protected static int count = 0;
+	protected static  ApplicationClient oAppClient;
 	static RCServer rCServer = new RCServer();
 	public void startServer()
 	{
 		//rCServer = new RCServer();
 		new Thread(rCServer).start();
-		ApplicationClient oAppClient = new ApplicationClient();
+		oAppClient = new ApplicationClient();
 		new Thread(oAppClient).start();
 	}
-	
+
 	public void cs_enter()
 	{
 		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
@@ -67,9 +69,14 @@ public class RoucairolCarvalho {
 		rCServer.startRCClients(minHeap, MessageType.RESPONSE_KEY);
 		minHeap = getPriorityQueue();
 		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
+		count++;
+		System.out.println("Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
+		if(count == noOfCriticalSectionRequests ){
+			rCServer.sendTermination();
+		}
 		return;
 	}
-	
+
 
 	public static PriorityQueue<Message> getPriorityQueue()
 	{
@@ -196,7 +203,7 @@ public class RoucairolCarvalho {
 	public void simulateRoucairolCarvalho() throws FileNotFoundException
 	{
 		//HashMap<Integer, Host> nMap = constructGraph("/Users/Dany/Documents/FALL-2013-COURSES/Imp_Data_structures/workspace/roucairol-carvalho/src/config.txt", nodeId);
-		HashMap<Integer, Host> nMap = constructGraph("/home/004/d/dx/dxa132330/advanced-operating-system/projects/roucairol-carvalho/config.txt", nodeId);
+		HashMap<Integer, Host> nMap = constructGraph("config.txt", nodeId);
 
 		System.out.println("[INFO]	["+sTime()+"]	No Of CS : "+noOfCriticalSectionRequests+"  Mean Delay : "+meanDelayInCriticalSection+"  Duration Of CS : "+durationOfCriticalSection);
 		startServer();
