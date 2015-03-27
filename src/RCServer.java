@@ -117,6 +117,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 						//preEmptQueue.add(messageObj.nodeInfo);
 						hostId = messageObj.nodeInfo.hostId;
 						nodeMap.get(hostId).keyKnown = false;
+						nodeMap.get(hostId).isRequested = false;
 						startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_KEY);   //REsponse_and_request key in case there is a CS request pending
 					}
 				}else if(messageObj.messageType  == MessageType.RESPONSE_KEY)
