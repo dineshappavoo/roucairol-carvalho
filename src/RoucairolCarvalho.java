@@ -42,7 +42,7 @@ public class RoucairolCarvalho {
 
 	public void cs_enter()
 	{
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
+		//System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
 		requestForCriticalSection = true;
 		//currentNodeCSEnterTimestamp.incrementAndGet();	
 		rCServer.requestAllKeys();
@@ -55,26 +55,45 @@ public class RoucairolCarvalho {
 				ex.printStackTrace();
 			}
 		}
-		System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
-		System.out.println("[INFO]	["+sTime()+"]	****=====	NODE "+nodeId+" IS GETTING INTO CRITICAL SECTION	=====****");
+		//System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
+		//System.out.println("[INFO]	["+sTime()+"]	****=====	NODE "+nodeId+" IS GETTING INTO CRITICAL SECTION	=====****");
 		isInCriticalSection = true;
+		displayCSMessage(nodeId);
 		return;
 	}
 
 	public void cs_leave()
 	{
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived to leave from Critical Section");
+		//System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived to leave from Critical Section");
 		//make the isInCriticalSection boolean as false
 		isInCriticalSection = false;
 		rCServer.startRCClients(minHeap, MessageType.RESPONSE_KEY);
 		minHeap = getPriorityQueue();
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
+		//System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
 		count++;
-		System.out.println("[INFO]	["+sTime()+"]	Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
+		//System.out.println("[INFO]	["+sTime()+"]	Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
 		if(count == noOfCriticalSectionRequests ){
 			rCServer.sendTermination();
 		}
 		return;
+	}
+	
+	public void displayCSMessage(int nodeId)
+	{
+		System.out.print("[INFO]	["+sTime()+"]\t");
+
+		for(int i=0;i<noOfNodes;i++)
+		{
+			if(i!=nodeId)
+			{
+				System.out.print("|\t");
+			}else
+			{
+				System.out.print("|  "+nodeId+" CS ");
+			}
+		}
+		System.out.print("|");
+		System.out.println();
 	}
 
 
@@ -112,7 +131,7 @@ public class RoucairolCarvalho {
 		int end = randInt(0, 9);		
 		int startNode = start<=end?start:end;
 		int endNode = start>end?start:end;
-		System.out.println("Start : "+startNode+" End : "+endNode);
+		//System.out.println("Start : "+startNode+" End : "+endNode);
 
 		//Read input from config file
 		while(scanner.hasNext())
@@ -157,7 +176,7 @@ public class RoucairolCarvalho {
 				}
 			}
 		}
-		printNodeMap();
+		//printNodeMap();
 		return nodeMap;	
 	}
 
@@ -205,7 +224,7 @@ public class RoucairolCarvalho {
 		//HashMap<Integer, Host> nMap = constructGraph("/Users/Dany/Documents/FALL-2013-COURSES/Imp_Data_structures/workspace/roucairol-carvalho/src/config.txt", nodeId);
 		HashMap<Integer, Host> nMap = constructGraph("config.txt", nodeId);
 
-		System.out.println("[INFO]	["+sTime()+"]	No Of CS : "+noOfCriticalSectionRequests+"  Mean Delay : "+meanDelayInCriticalSection+"  Duration Of CS : "+durationOfCriticalSection);
+		//System.out.println("[INFO]	["+sTime()+"]	No Of CS : "+noOfCriticalSectionRequests+"  Mean Delay : "+meanDelayInCriticalSection+"  Duration Of CS : "+durationOfCriticalSection);
 		startServer();
 	}
 

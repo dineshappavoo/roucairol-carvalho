@@ -1,6 +1,7 @@
 /**
  * 
  */
+import java.awt.Toolkit;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,12 +66,18 @@ public class ApplicationClient implements Runnable{
 			lock = out.getChannel().tryLock();
 			if (lock == null)
 			{
-				System.out.println("Yes, one or more violations were found");
+				int i=0;
+				System.out.println("[FATAL]	["+sTime()+"]	Yes, one or more violations were found");
+				while(i<10)
+				{
+					Toolkit.getDefaultToolkit().beep();
+					i++;
+				}
 			}
 			else
 			{
-				System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	NODE IS IN CRITICAL SECTION	| 	?????=====****");
-				System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
+				//System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	NODE IS IN CRITICAL SECTION	| 	?????=====****");
+				//System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
 
 
 				long startTime = System.currentTimeMillis();
