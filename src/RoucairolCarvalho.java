@@ -56,7 +56,7 @@ public class RoucairolCarvalho {
 			}
 		}
 		System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
-		System.out.println("[INFO]	["+sTime()+"]	****=====		NODE "+nodeId+" IS GETTING INTO CRITICAL SECTION		=====****");
+		System.out.println("[INFO]	["+sTime()+"]	****=====	NODE "+nodeId+" IS GETTING INTO CRITICAL SECTION	=====****");
 		isInCriticalSection = true;
 		return;
 	}
@@ -70,7 +70,7 @@ public class RoucairolCarvalho {
 		minHeap = getPriorityQueue();
 		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
 		count++;
-		System.out.println("Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
+		System.out.println("[INFO]	["+sTime()+"]	Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
 		if(count == noOfCriticalSectionRequests ){
 			rCServer.sendTermination();
 		}
