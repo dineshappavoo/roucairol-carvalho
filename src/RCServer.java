@@ -280,7 +280,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 
 	}
 
-	public synchronized boolean isAllNodeKeysKnown()
+	public boolean isAllNodeKeysKnown()
 	{
 		Host host;
 		for(int nId : nodeMap.keySet())

@@ -30,12 +30,12 @@ public class ApplicationClient implements Runnable{
 	public void generateSeries(){
 		long range = (long)(2*meanDelayInCriticalSection) - (long)1 + 1;
 		for(int i=0; i<noOfCriticalSectionRequests/2; i++){
-			  Random aRandom = new Random();
-			  long fraction = (long)(range * aRandom.nextDouble());
-			  int randomNumber =  (int)(fraction);  
-			  series.add(randomNumber);
-			  series.add(2*meanDelayInCriticalSection -randomNumber);
-			  
+			Random aRandom = new Random();
+			long fraction = (long)(range * aRandom.nextDouble());
+			int randomNumber =  (int)(fraction);  
+			series.add(randomNumber);
+			series.add(2*meanDelayInCriticalSection -randomNumber);
+
 		}
 		if(noOfCriticalSectionRequests%2==1){
 			series.add(meanDelayInCriticalSection);
@@ -51,12 +51,61 @@ public class ApplicationClient implements Runnable{
 		//this.rCServer = rCServer;
 	}
 
+	public int[] distributeMeanDelay(int n, int sum)
+	{
+		int[] nums = new int[n];
+		int upperbound = Long.valueOf(Math.round(sum*1.0/n)).intValue();
+		int offset = Long.valueOf(Math.round(0.5*upperbound)).intValue();
+
+		int cursum = 0;
+		Random random = new Random(new Random().nextInt());
+		for(int i=0 ; i < n ; i++){
+			int rand = random.nextInt(upperbound) + offset;
+			if( cursum + rand > sum || i == n - 1) {
+				rand = sum - cursum;
+			}
+			cursum += rand;
+			nums[i]=rand;
+			if(cursum == sum){
+				break;
+			}
+		}
+		return nums;
+	}
+
+	//Implementing Fisher Yates shuffle
+	public void shuffleArray(int[] ar)
+	{
+		Random rnd = new Random();
+		for (int i = ar.length - 1; i > 0; i--)
+		{
+			int index = rnd.nextInt(i + 1);
+			// Simple swap
+			int a = ar[index];
+			ar[index] = ar[i];
+			ar[i] = a;
+		}
+	}
+	
+	public int[] generateSkewedRandom(int[] arr, int skewValue)
+	{
+		int[] newArr = new int[arr.length+1];
+		for(int i=0;i<arr.length;i++)
+		{
+			newArr[i] = arr[i];
+		}
+		newArr[arr.length] = skewValue;
+		return newArr;
+	}
+	
 	public void csEnterInitiate()
 	{
 		try
 		{	
 			Thread.sleep(10000);
-			
+			int[] meanDelayArr = distributeMeanDelay(noOfCriticalSectionRequests, ((noOfCriticalSectionRequests * meanDelayInCriticalSection)/2));
+			meanDelayArr = generateSkewedRandom(meanDelayArr, ((noOfCriticalSectionRequests * meanDelayInCriticalSection)/2));
+			shuffleArray(meanDelayArr);
 			for(int i=0;i<noOfCriticalSectionRequests;i++)
 			{
 				//TODO: call server csEnter
@@ -67,7 +116,7 @@ public class ApplicationClient implements Runnable{
 				int currentDelay = series.get(iterator);
 				iterator++;
 				//System.out.println("Current Delay = "+currentDelay);
-				Thread.sleep(currentDelay);
+				Thread.sleep(meanDelayArr[i]);
 
 			}
 		} catch(Exception e)

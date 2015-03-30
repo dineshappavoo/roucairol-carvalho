@@ -8,23 +8,23 @@
 # Number of nodes
 p 15     
     
-n   0               dc34        48325   
-n   1               dc35        48326
-n   2               dc36        48327
-n   3               dc37        48328
-n   4               dc38        48329
-n   5               dc39        48330
-n   6               dc40        48331
-n   7               dc01        48332
-n   8               dc02        48333
-n   9               dc03        48334
-n   10               dc04        48335
-n   11               dc05        48336
-n   12               dc06        48337
-n   13               dc07        48338
-n   14               dc08        48339
+n   0               dc34        48115   
+n   1               dc35        48116
+n   2               dc36        48117
+n   3               dc37        48118
+n   4               dc38        48119
+n   5               dc39        48120
+n   6               dc40        48121
+n   7               dc01        48122
+n   8               dc02        48123
+n   9               dc03        48124
+n   10               dc04        48125
+n   11               dc05        48126
+n   12               dc06        48127
+n   13               dc07        48128
+n   14               dc08        48129
 
 
-cscount 3      
+cscount 5      
 meandelay 10000       
 duration 10000  
