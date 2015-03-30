@@ -36,11 +36,7 @@ public class RoucairolCarvalho {
 	{
 		//rCServer = new RCServer();
 		new Thread(rCServer).start();
-<<<<<<< HEAD
 		oAppClient = new ApplicationClient(noOfCriticalSectionRequests, meanDelayInCriticalSection, durationOfCriticalSection);
-=======
-		oAppClient = new ApplicationClient(noOfCriticalSectionRequests,meanDelayInCriticalSection,durationOfCriticalSection);
->>>>>>> ae7091f67511767d0f3fc00393d470e9b468b827
 		new Thread(oAppClient).start();
 	}
 

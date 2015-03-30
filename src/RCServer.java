@@ -32,7 +32,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 		//this.nWaitingForTerminationResponseCount = nWaitingForTerminationResponseCount;
 	}
 
-	public void go()
+	public synchronized void go()
 	{
 		//Buffer to hold messages in byte format
 		ByteBuffer byteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);

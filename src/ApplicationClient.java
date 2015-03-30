@@ -20,9 +20,9 @@ import java.util.Random;
 public class ApplicationClient implements Runnable{
 	//Hardcoded for now
 	//TODO: Set the below variables from the config file
-	private static int noOfCriticalSectionRequests;
-	private static int meanDelayInCriticalSection;
-	private static int durationOfCriticalSection;
+	private int noOfCriticalSectionRequests;
+	private int meanDelayInCriticalSection;
+	private int durationOfCriticalSection;
 	private RoucairolCarvalho rcObj = new RoucairolCarvalho();
 
 	private LinkedList<Integer> series = new LinkedList<Integer>();
