@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.nio.channels.FileLock;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Random;
 
 /**
  * @author Rahul
@@ -17,17 +20,35 @@ import java.util.Calendar;
 public class ApplicationClient implements Runnable{
 	//Hardcoded for now
 	//TODO: Set the below variables from the config file
-	private int noOfCriticalSectionRequests = 1;
-	private int meanDelayInCriticalSection = 10000;
-	private int durationOfCriticalSection = 10000;
+	private static int noOfCriticalSectionRequests;
+	private static int meanDelayInCriticalSection;
+	private static int durationOfCriticalSection;
 	private RoucairolCarvalho rcObj = new RoucairolCarvalho();
 
-	public ApplicationClient(int noOfCriticalSectionRequests, int meanDelayInCriticalSection, int durationOfCriticalSection)
-	{
+	private LinkedList<Integer> series = new LinkedList<Integer>();
+	private int iterator;
+	public void generateSeries(){
+		long range = (long)(2*meanDelayInCriticalSection) - (long)1 + 1;
+		for(int i=0; i<noOfCriticalSectionRequests/2; i++){
+			  Random aRandom = new Random();
+			  long fraction = (long)(range * aRandom.nextDouble());
+			  int randomNumber =  (int)(fraction);  
+			  series.add(randomNumber);
+			  series.add(2*meanDelayInCriticalSection -randomNumber);
+			  
+		}
+		if(noOfCriticalSectionRequests%2==1){
+			series.add(meanDelayInCriticalSection);
+		}
+		iterator = 0;
+	}
+	public ApplicationClient(int numCriticalSection, int meanDelay, int duration ){
+
+		this.noOfCriticalSectionRequests = numCriticalSection;
+		this.meanDelayInCriticalSection = meanDelay;
+		this.durationOfCriticalSection= duration;
+		generateSeries();
 		//this.rCServer = rCServer;
-		this.noOfCriticalSectionRequests = noOfCriticalSectionRequests;
-		this.meanDelayInCriticalSection = meanDelayInCriticalSection;
-		this.durationOfCriticalSection = durationOfCriticalSection;
 	}
 
 	public void csEnterInitiate()
@@ -35,14 +56,18 @@ public class ApplicationClient implements Runnable{
 		try
 		{	
 			Thread.sleep(10000);
-
+			
 			for(int i=0;i<noOfCriticalSectionRequests;i++)
 			{
 				//TODO: call server csEnter
 				rcObj.cs_enter();
 				csExecute();
 				rcObj.cs_leave();
-				Thread.sleep(meanDelayInCriticalSection);
+				System.out.println(series);
+				int currentDelay = series.get(iterator);
+				iterator++;
+				System.out.println("Current Delay = "+currentDelay);
+				Thread.sleep(currentDelay);
 
 			}
 		} catch(Exception e)
