@@ -1,5 +1,9 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -32,9 +36,22 @@ public class RoucairolCarvalho {
 	protected static int count = 0;
 	protected static  ApplicationClient oAppClient;
 	static RCServer rCServer = new RCServer();
+	protected PrintWriter out;
+
 	public void startServer()
 	{
-		//rCServer = new RCServer();
+		try
+		{
+			//Create log file
+			String fileName = "node"+nodeId+".log";
+			out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)));
+		}
+		catch(IOException ex)
+		{
+			out.close();
+			ex.printStackTrace();	
+		}
+
 		new Thread(rCServer).start();
 		oAppClient = new ApplicationClient(noOfCriticalSectionRequests, meanDelayInCriticalSection, durationOfCriticalSection);
 		new Thread(oAppClient).start();
@@ -42,11 +59,9 @@ public class RoucairolCarvalho {
 
 	public void cs_enter()
 	{
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
+		//out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
 		requestForCriticalSection = true;
 		currentNodeCSEnterTimestamp.incrementAndGet();
-
-		//currentNodeCSEnterTimestamp.incrementAndGet();	
 		rCServer.requestAllKeys();
 		while(!rCServer.isAllNodeKeysKnown())
 		{
@@ -57,8 +72,6 @@ public class RoucairolCarvalho {
 				ex.printStackTrace();
 			}
 		}
-		//System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
-		//System.out.println("[INFO]	["+sTime()+"]	****=====	NODE "+nodeId+" IS GETTING INTO CRITICAL SECTION	=====****");
 		isInCriticalSection = true;
 		displayCSMessage(nodeId);
 		return;
@@ -66,21 +79,21 @@ public class RoucairolCarvalho {
 
 	public void cs_leave()
 	{
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived to leave from Critical Section");
+		//out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived to leave from Critical Section");
 		//make the isInCriticalSection boolean as false
 		isInCriticalSection = false;
 		requestForCriticalSection = false;
 		rCServer.startRCClients(minHeap, MessageType.RESPONSE_KEY);
 		minHeap = getPriorityQueue();
-		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
+		//out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
 		count++;
-		System.out.println("[INFO]	["+sTime()+"]	Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
+		//out.println("[INFO]	["+sTime()+"]	Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
 		if(count == noOfCriticalSectionRequests ){
 			rCServer.sendTermination();
 		}
 		return;
 	}
-	
+
 	public void displayCSMessage(int nodeId)
 	{
 		System.out.print("[INFO]	["+sTime()+"]\t");

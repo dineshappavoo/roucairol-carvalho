@@ -48,11 +48,11 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 			InetSocketAddress serverAddr = new InetSocketAddress(port);
 			//Bind the channel's socket to the server in the current machine at port 5000
 			sctpServerChannel.bind(serverAddr);
+			
 
 			System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  SERVER STARTED");
 			System.out.println("[INFO]	["+sTime()+"]	==================================");
-
-
+			
 			Thread.sleep(7000);
 			minHeap = getPriorityQueue();
 			//preEmptQueue = new ArrayList<Host>();
@@ -95,7 +95,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 
 				if(messageObj.messageType  == MessageType.REQUEST_KEY)
 				{
-					System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Node ID : "+nodeId+"	CurrentNode Timestamp : "+currentNodeCSEnterTimestamp.get()+"	Message Timestamp : "+messageObj.timeStamp+"	Got Request from Node Id "+messageObj.nodeInfo.hostId);
+					//out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Node ID : "+nodeId+"	CurrentNode Timestamp : "+currentNodeCSEnterTimestamp.get()+"	Message Timestamp : "+messageObj.timeStamp+"	Got Request from Node Id "+messageObj.nodeInfo.hostId);
 
 					if(isInCriticalSection)
 					{
@@ -140,7 +140,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 					}
 				}else if(messageObj.messageType  == MessageType.RESPONSE_KEY)
 				{
-					System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Node ID : "+nodeId+"	CurrentNode Timestamp : "+currentNodeCSEnterTimestamp.get()+"	Message Timestamp : "+messageObj.timeStamp+"	Got Response from Node Id "+messageObj.nodeInfo.hostId);
+					//out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Node ID : "+nodeId+"	CurrentNode Timestamp : "+currentNodeCSEnterTimestamp.get()+"	Message Timestamp : "+messageObj.timeStamp+"	Got Response from Node Id "+messageObj.nodeInfo.hostId);
 
 					hostId = messageObj.nodeInfo.hostId;
 					nodeMap.get(hostId).keyKnown = true;
@@ -153,7 +153,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 
 				}else if(messageObj.messageType == MessageType.RESPONSE_AND_REQUEST_KEY)
 				{
-					System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Node ID : "+nodeId+"	CurrentNode Timestamp : "+currentNodeCSEnterTimestamp.get()+"	Message Timestamp : "+messageObj.timeStamp+"	Got Response and Request from Node Id "+messageObj.nodeInfo.hostId);
+					//out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Node ID : "+nodeId+"	CurrentNode Timestamp : "+currentNodeCSEnterTimestamp.get()+"	Message Timestamp : "+messageObj.timeStamp+"	Got Response and Request from Node Id "+messageObj.nodeInfo.hostId);
 
 					//This case we don't have to compare the timestamp because the other node is sending 'RESPONSE_AND_REQUEST_KEY' which means the timestamp of other node is greater than the current
 					minHeap.add(messageObj);
@@ -165,7 +165,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 				}else if(messageObj.messageType == MessageType.TERMINATION_MESSAGE)
 				{
 
-					System.out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Node ID : "+nodeId+"	CurrentNode Timestamp : "+currentNodeCSEnterTimestamp.get()+"	Message Timestamp : "+messageObj.timeStamp+"	Got Termination message from Node Id "+messageObj.nodeInfo.hostId);
+					//out.println("[INFO]	["+sTime()+"]	["+messageObj.messageType+"]	Node ID : "+nodeId+"	CurrentNode Timestamp : "+currentNodeCSEnterTimestamp.get()+"	Message Timestamp : "+messageObj.timeStamp+"	Got Termination message from Node Id "+messageObj.nodeInfo.hostId);
 					hostId = messageObj.nodeInfo.hostId;
 					nodeMap.get(hostId).isTerminated = true;
 
@@ -185,7 +185,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 						{
 							if(count == noOfCriticalSectionRequests){
 								while(isInCriticalSection);
-								System.out.println("[INFO]	["+sTime()+"]	Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
+								//out.println("[INFO]	["+sTime()+"]	Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
 
 								rCServer.sendTermination();
 							}
@@ -245,7 +245,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 				host = nodeMap.get(nId);
 				RCClient  rCClient;
 				Message message;
-				//System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Starting the client to send termination message to "+host.hostName+" at port "+host.hostPort);
+				//out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Starting the client to send termination message to "+host.hostName+" at port "+host.hostPort);
 
 				message = new Message(currentNodeCSEnterTimestamp, MessageType.TERMINATION_MESSAGE, nodeMap.get(nodeId));
 				rCClient = new RCClient(host, message);
@@ -260,7 +260,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 		for(int i : nodeMap.keySet()){
 			if(i != nodeId)
 			{
-				//System.out.println("[INFO]	["+sTime()+"]	Node: "+nodeMap.get(i).hostName);
+				//out.println("[INFO]	["+sTime()+"]	Node: "+nodeMap.get(i).hostName);
 				if(!nodeMap.get(i).isTerminated){
 					isAllDone = false;
 				}
@@ -348,7 +348,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 			}
 			RCClient  rCClient;
 			Message message;
-			//System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Starting the client to request for a key to "+host.hostName+" at port "+host.hostPort);
+			//out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Starting the client to request for a key to "+host.hostName+" at port "+host.hostPort);
 
 			message = new Message(currentNodeCSEnterTimestamp, sMessageType, nodeMap.get(nodeId));
 			rCClient = new RCClient(host, message);
@@ -361,7 +361,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 	public synchronized void startRCClients(PriorityQueue<Message> minHeap, MessageType sMessageType)
 	{		
 		int size = minHeap.size();
-		System.out.println("Min Heap Size : "+size);
+		//out.println("Min Heap Size : "+size);
 		int nNumOfThreads=size;
 		Thread[] tThreads = new Thread[nNumOfThreads];
 		RCClient  rCClient;
@@ -383,7 +383,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 			if(m!=null)
 			{
 				Host host = m.nodeInfo;
-				System.out.println("[INFO]	["+sTime()+"]	Node Name : "+host.hostName);
+				//out.println("[INFO]	["+sTime()+"]	WAITING-LIST	Node Name : "+host.hostName);
 				if (nodeId!=host.hostId)
 				{
 

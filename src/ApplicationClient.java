@@ -104,7 +104,7 @@ public class ApplicationClient implements Runnable{
 			}
 			else
 			{
-				System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	NODE IS IN CRITICAL SECTION	| 	?????=====****");
+				//System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	NODE IS IN CRITICAL SECTION	| 	?????=====****");
 				//System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
 
 
