@@ -1,0 +1,53 @@
+#
+# Configuration file for AOS Project 2
+# 
+#
+# As per the "shell" convention, anything following a hash sign is
+# a comment and should be ignored by the parser.
+
+# Number of nodes
+p 40     
+    
+n   0               dc34        48151   
+n   1               dc35        48152
+n   2               dc36        48153
+n   3               dc37        48154
+n   4               dc38        48155
+n   5               dc39        48156
+n   6               dc40        48157
+n   7               dc01        48158
+n   8               dc02        48159
+n   9               dc03        48160
+n   10               dc04        48161
+n   11               dc05        48162
+n   12               dc06        48163
+n   13               dc07        48164
+n   14               dc08        48165
+n   15               dc09        48166
+n   16               dc10        48167
+n   17               dc11        48168
+n   18               dc12        48169
+n   19               dc13        48170
+n   20               dc14        48171
+n   21               dc15        48172
+n   22               dc16        48173
+n   23               dc17        48174
+n   24               dc18        48175
+n   25               dc19        48176
+n   26               dc20        48177
+n   27               dc21        48178
+n   28               dc22        48179
+n   29               dc23        48180
+n   30               dc24        48181
+n   31               dc25        48182
+n   32               dc26        48183
+n   34               dc27        48184
+n   35               dc28        48185
+n   36               dc29        48186
+n   37               dc30        48187
+n   38               dc31        48188
+n   39               dc32        48189
+
+cscount 1      
+meandelay 10000       
+duration 10000  

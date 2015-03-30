@@ -32,7 +32,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 		//this.nWaitingForTerminationResponseCount = nWaitingForTerminationResponseCount;
 	}
 
-	public synchronized void go()
+	public void go()
 	{
 		//Buffer to hold messages in byte format
 		ByteBuffer byteBuffer = ByteBuffer.allocate(MESSAGE_SIZE);
@@ -114,7 +114,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 								{
 									hostId = messageObj.nodeInfo.hostId;
 									nodeMap.get(hostId).keyKnown = false;
-									currentNodeCSEnterTimestamp.incrementAndGet(); //Timestamp is getting incremented since it is RESPONSE_AND_REQUEST_KEY
+									//currentNodeCSEnterTimestamp.incrementAndGet(); //Timestamp is getting incremented since it is RESPONSE_AND_REQUEST_KEY
 									startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_AND_REQUEST_KEY);   //Response_and_request key in case there is a CS request pending
 								}
 							}else
@@ -126,7 +126,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 						{
 							hostId = messageObj.nodeInfo.hostId;
 							nodeMap.get(hostId).keyKnown = false;
-							currentNodeCSEnterTimestamp.incrementAndGet(); //Timestamp is getting incremented since it is RESPONSE_AND_REQUEST_KEY
+							//currentNodeCSEnterTimestamp.incrementAndGet(); //Timestamp is getting incremented since it is RESPONSE_AND_REQUEST_KEY
 							startRCClient(messageObj.nodeInfo, MessageType.RESPONSE_AND_REQUEST_KEY);   //Response_and_request key in case there is a CS request pending
 						}
 					}				
@@ -219,8 +219,6 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 	public void requestAllKeys()
 	{
 		Host host;
-		currentNodeCSEnterTimestamp.incrementAndGet();
-
 		for(int nId : nodeMap.keySet())
 		{
 			host = nodeMap.get(nId);
@@ -238,7 +236,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 		nodeMap.get(nodeId).isTerminated=true;
 		Thread a[] = new Thread[nodeMap.keySet().size()];
 		int index=0;
-		currentNodeCSEnterTimestamp.incrementAndGet();
+		//currentNodeCSEnterTimestamp.incrementAndGet();
 
 		for(int nId : nodeMap.keySet())
 		{

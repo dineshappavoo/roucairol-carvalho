@@ -63,10 +63,10 @@ public class ApplicationClient implements Runnable{
 				rcObj.cs_enter();
 				csExecute();
 				rcObj.cs_leave();
-				System.out.println(series);
+				//System.out.println(series);
 				int currentDelay = series.get(iterator);
 				iterator++;
-				System.out.println("Current Delay = "+currentDelay);
+				//System.out.println("Current Delay = "+currentDelay);
 				Thread.sleep(currentDelay);
 
 			}
@@ -104,7 +104,7 @@ public class ApplicationClient implements Runnable{
 			}
 			else
 			{
-				//System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	NODE IS IN CRITICAL SECTION	| 	?????=====****");
+				System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	NODE IS IN CRITICAL SECTION	| 	?????=====****");
 				//System.out.println("[INFO]	["+sTime()+"]	****=====?????	|	***************************	| 	?????=====****");
 
 

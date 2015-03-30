@@ -44,6 +44,7 @@ public class RoucairolCarvalho {
 	{
 		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
 		requestForCriticalSection = true;
+		currentNodeCSEnterTimestamp.incrementAndGet();
 
 		//currentNodeCSEnterTimestamp.incrementAndGet();	
 		rCServer.requestAllKeys();
