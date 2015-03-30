@@ -40,6 +40,13 @@ public class RoucairolCarvalho {
 
 	public void startServer()
 	{
+		new Thread(rCServer).start();
+		oAppClient = new ApplicationClient(noOfCriticalSectionRequests, meanDelayInCriticalSection, durationOfCriticalSection);
+		new Thread(oAppClient).start();
+	}
+
+	public void cs_enter()
+	{
 		try
 		{
 			//Create log file
@@ -51,14 +58,6 @@ public class RoucairolCarvalho {
 			out.close();
 			ex.printStackTrace();	
 		}
-
-		new Thread(rCServer).start();
-		oAppClient = new ApplicationClient(noOfCriticalSectionRequests, meanDelayInCriticalSection, durationOfCriticalSection);
-		new Thread(oAppClient).start();
-	}
-
-	public void cs_enter()
-	{
 		//out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
 		requestForCriticalSection = true;
 		currentNodeCSEnterTimestamp.incrementAndGet();
@@ -74,6 +73,7 @@ public class RoucairolCarvalho {
 		}
 		isInCriticalSection = true;
 		displayCSMessage(nodeId);
+		out.println(System.currentTimeMillis()+":"+nodeId+"-Start");
 		return;
 	}
 
@@ -81,6 +81,9 @@ public class RoucairolCarvalho {
 	{
 		//out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived to leave from Critical Section");
 		//make the isInCriticalSection boolean as false
+		out.println(System.currentTimeMillis()+":"+nodeId+"-End");
+		out.flush();
+		out.close();
 		isInCriticalSection = false;
 		requestForCriticalSection = false;
 		rCServer.startRCClients(minHeap, MessageType.RESPONSE_KEY);
