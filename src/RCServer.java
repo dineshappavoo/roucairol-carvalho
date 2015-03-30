@@ -216,7 +216,7 @@ public class RCServer extends RoucairolCarvalho implements Runnable{
 	}
 
 
-	public void requestAllKeys()
+	public synchronized void requestAllKeys()
 	{
 		Host host;
 		for(int nId : nodeMap.keySet())
