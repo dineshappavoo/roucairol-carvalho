@@ -28,7 +28,7 @@ public class RoucairolCarvalho {
 	protected static boolean isInCriticalSection = false;
 	protected static boolean requestForCriticalSection = false;
 	protected static PriorityQueue<Message> minHeap = getPriorityQueue();
-	protected AtomicInteger currentNodeCSEnterTimestamp = new AtomicInteger(0);
+	protected static AtomicInteger currentNodeCSEnterTimestamp = new AtomicInteger(0);
 	protected static int count = 0;
 	protected static  ApplicationClient oAppClient;
 	static RCServer rCServer = new RCServer();
@@ -36,14 +36,15 @@ public class RoucairolCarvalho {
 	{
 		//rCServer = new RCServer();
 		new Thread(rCServer).start();
-		oAppClient = new ApplicationClient();
+		oAppClient = new ApplicationClient(noOfCriticalSectionRequests, meanDelayInCriticalSection, durationOfCriticalSection);
 		new Thread(oAppClient).start();
 	}
 
 	public void cs_enter()
 	{
-		//System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived for Entering into Critical Section");
 		requestForCriticalSection = true;
+
 		//currentNodeCSEnterTimestamp.incrementAndGet();	
 		rCServer.requestAllKeys();
 		while(!rCServer.isAllNodeKeysKnown())
@@ -64,14 +65,15 @@ public class RoucairolCarvalho {
 
 	public void cs_leave()
 	{
-		//System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived to leave from Critical Section");
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  Request arrived to leave from Critical Section");
 		//make the isInCriticalSection boolean as false
 		isInCriticalSection = false;
+		requestForCriticalSection = false;
 		rCServer.startRCClients(minHeap, MessageType.RESPONSE_KEY);
 		minHeap = getPriorityQueue();
-		//System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
+		System.out.println("[INFO]	["+sTime()+"]	Node Id "+nodeId+"  left Critical Section");
 		count++;
-		//System.out.println("[INFO]	["+sTime()+"]	Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
+		System.out.println("[INFO]	["+sTime()+"]	Count Value - "+count+"   Total CS Requests = "+noOfCriticalSectionRequests);
 		if(count == noOfCriticalSectionRequests ){
 			rCServer.sendTermination();
 		}

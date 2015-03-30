@@ -6,18 +6,12 @@
 # a comment and should be ignored by the parser.
 
 # Number of nodes
-p 8    	
-	
-n	0				dc01		18341	
-n	1				dc33		29352
-n	2				dc34		40363
-n	3				dc35		42374
-n	4				dc36		41385
-n	5				dc37		46396
-n	6				dc38		45307
-n	7				dc39		44318
+p 2     
+    
+n   0               dc01        48092   
+n   1               dc33        48093
 
 
-cscount 2      
+cscount 1      
 meandelay 10000       
-duration 10000 	
+duration 10000  

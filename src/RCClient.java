@@ -41,7 +41,7 @@ public class RCClient implements Runnable{
 		String responseMessageFromServer="";
 		try
 		{
-			Thread.sleep(5000);
+			Thread.sleep(1000);
 			//Create a socket address for  server at dc at port XXX
 			SocketAddress socketAddress = new InetSocketAddress(hostToBeRequested.hostName,hostToBeRequested.hostPort);
 			//Open a channel. NOT SERVER CHANNEL

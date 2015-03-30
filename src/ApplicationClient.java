@@ -17,14 +17,17 @@ import java.util.Calendar;
 public class ApplicationClient implements Runnable{
 	//Hardcoded for now
 	//TODO: Set the below variables from the config file
-	private static int noOfCriticalSectionRequests = 2;
-	private static int meanDelayInCriticalSection = 10000;
-	private static int durationOfCriticalSection = 10000;
+	private int noOfCriticalSectionRequests = 1;
+	private int meanDelayInCriticalSection = 10000;
+	private int durationOfCriticalSection = 10000;
 	private RoucairolCarvalho rcObj = new RoucairolCarvalho();
 
-	public ApplicationClient()
+	public ApplicationClient(int noOfCriticalSectionRequests, int meanDelayInCriticalSection, int durationOfCriticalSection)
 	{
 		//this.rCServer = rCServer;
+		this.noOfCriticalSectionRequests = noOfCriticalSectionRequests;
+		this.meanDelayInCriticalSection = meanDelayInCriticalSection;
+		this.durationOfCriticalSection = durationOfCriticalSection;
 	}
 
 	public void csEnterInitiate()
